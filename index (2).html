@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Световая фаза фотосинтеза — интерактивный тест</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:Arial, sans-serif;
+  background:linear-gradient(135deg,#f5fbff,#eef8f0);
+  color:#17324d; min-height:100vh; display:flex; justify-content:center;
+  padding:28px 16px;
+}
+.app{width:min(900px,100%);}
+.header{
+  background:white;border-radius:24px;padding:24px 28px;margin-bottom:18px;
+  box-shadow:0 10px 30px rgba(30,80,100,.10);
+}
+h1{margin:0 0 8px;font-size:clamp(24px,4vw,38px)}
+.subtitle{color:#638096;font-size:17px}
+.progress-wrap{margin-top:20px}
+.progress-top{display:flex;justify-content:space-between;font-weight:700;margin-bottom:8px}
+.progress{height:12px;background:#e6eef2;border-radius:20px;overflow:hidden}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#28a9e0,#45c47a);transition:.35s}
+
+.card{
+ background:white;border-radius:24px;padding:30px;
+ box-shadow:0 10px 30px rgba(30,80,100,.10);
+}
+.question-number{color:#20a56b;font-weight:800;font-size:16px;margin-bottom:12px}
+.question{font-size:clamp(21px,3vw,29px);font-weight:800;line-height:1.3;margin-bottom:24px}
+.options{display:grid;gap:12px}
+.option{
+ border:2px solid #dce8ee;background:#fbfdfe;border-radius:16px;
+ padding:17px 18px;text-align:left;font-size:17px;cursor:pointer;
+ transition:.2s; display:flex;gap:12px;align-items:flex-start;
+}
+.option:hover:not(.disabled){border-color:#42b5dd;background:#f2fbff;transform:translateY(-1px)}
+.letter{font-weight:800;min-width:28px}
+.option.correct{background:#e9f9ef;border-color:#35b76d;color:#176a3d}
+.option.wrong{background:#fff0f0;border-color:#e05a5a;color:#9d2929}
+.option.disabled{cursor:default}
+.feedback{
+ display:none;margin-top:20px;padding:18px;border-radius:16px;
+ font-size:17px;line-height:1.5;
+}
+.feedback.show{display:block}
+.feedback.correct{background:#eaf9ef;border-left:6px solid #35b76d}
+.feedback.wrong{background:#fff1f1;border-left:6px solid #e05a5a}
+.answer{font-weight:800}
+.next{
+ display:none;width:100%;margin-top:18px;padding:16px;border:0;border-radius:15px;
+ background:#17324d;color:white;font-size:18px;font-weight:800;cursor:pointer;
+}
+.next.show{display:block}
+.next:hover{background:#214968}
+.result{display:none;text-align:center}
+.result.show{display:block}
+.score{font-size:70px;font-weight:900;color:#20a56b;margin:15px 0}
+.restart{
+ border:0;border-radius:15px;padding:15px 25px;background:#20a56b;color:white;
+ font-size:17px;font-weight:800;cursor:pointer
+}
+.note{margin-top:16px;color:#71899a;font-size:14px;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>☀️ Световая фаза фотосинтеза</h1>
+    <div class="subtitle">Фотосфосфорилирование • интерактивный тест</div>
+    <div class="progress-wrap">
+      <div class="progress-top"><span id="counter">Вопрос 1 из 20</span><span id="percent">0%</span></div>
+      <div class="progress"><div class="bar" id="bar"></div></div>
+    </div>
+  </div>
+
+  <div class="card" id="quizCard">
+    <div class="question-number" id="qnum">ВОПРОС 1</div>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next" id="next">Следующий вопрос →</button>
+  </div>
+
+  <div class="card result" id="result">
+    <div style="font-size:60px">🌿</div>
+    <h2>Тест завершён!</h2>
+    <div class="score" id="score"></div>
+    <p id="resultText"></p>
+    <button class="restart" onclick="restart()">Пройти ещё раз</button>
+  </div>
+  <div class="note">После каждого ответа сразу показывается правильный вариант.</div>
+</div>
+
+<script>
+const questions = [
+{q:"Какой основной процесс происходит в световой фазе фотосинтеза?",o:["Расщепление глюкозы","Синтез ДНК","Фотолиз воды","Ферментация","Клеточное деление"],a:2,e:"В фотосистеме II происходит фотолиз воды с образованием электронов, протонов и кислорода."},
+{q:"Какой элемент участвует в процессе фотолиза воды?",o:["Ферредоксин","Хлорофилл","Натрий","Калий","Углерод"],a:1,e:"Хлорофилл участвует в световых реакциях и передаче энергии; фотолиз воды связан с фотосистемой II."},
+{q:"Что является результатом световой фазы фотосинтеза?",o:["Синтез глюкозы","Производство воды","Образование кислорода","Поглощение CO₂","Увеличение количества хлоропластов"],a:2,e:"Одним из результатов световой фазы является выделение O₂ при фотолизе воды."},
+{q:"Где происходят основные реакции световой фазы фотосинтеза?",o:["В митохондриях","В цитоплазме","В мембранах тилакоидов","В ядре","В рибосомах"],a:2,e:"Фотосистемы, цепь переноса электронов и АТФ-синтаза расположены в тилакоидной мембране."},
+{q:"Какую функцию выполняет АТФ-синтаза в процессе световой фазы?",o:["Расщепление кислорода","Транспорт воды","Синтез АТФ","Поглощение света","Разложение углерода"],a:2,e:"АТФ-синтаза использует энергию протонного градиента для синтеза АТФ."},
+{q:"Какой элемент участвует в восстановлении НАДФ⁺ в световой фазе?",o:["O₂","NADPH","H₂O","Fe","H⁺"],a:4,e:"Для восстановления НАДФ⁺ используются электроны и протон; образуется NADPH."},
+{q:"Какие два процесса образуют разность зарядов на мембране тилакоидов?",o:["Фотолиз воды и синтез кислорода","Синтез АТФ и деградация НАДФ","Окисление хлорофилла и восстановление H⁺","Фотолиз воды и транспорт протонов","Перенос электронов и ионов водорода"],a:3,e:"Фотолиз воды и перенос протонов способствуют накоплению H⁺ в просвете тилакоида и созданию градиента."},
+{q:"Какая система фотосинтеза управляет первой стадией световой фазы?",o:["ФС I","Хлорофилл","Цитохром","АТФ-синтаза","ФС II"],a:4,e:"Фотосистема II первой поглощает свет в нециклическом потоке электронов и запускает фотолиз воды."},
+{q:"Какое количество энергии запасается в процессе световой фазы фотосинтеза?",o:["Молекула АТФ","Молекула НАДФ","Одна молекула воды","Две молекулы АТФ и НАДФ","Один электрон"],a:3,e:"В световой фазе энергия света запасается в химической форме — в АТФ и восстановленном НАДФ (NADPH)."},
+{q:"В каком процессе участвует пластохинон?",o:["Передача электронов в ФС II","Передача протонов из стромы в тилакоид","Восстановление кислорода","Деградация НАДФ","Транспорт воды"],a:1,e:"Пластохинон переносит электроны и участвует в переносе протонов к комплексу цитохрома b6f."},
+{q:"Какую роль играет ферредоксин в световой фазе фотосинтеза?",o:["Поглощение света","Образование кислорода","Расщепление воды","Передача протонов","Перенос электронов на НАДФ"],a:4,e:"Ферредоксин переносит электроны от ФС I к ферредоксин-НАДФ⁺-редуктазе, участвующей в образовании NADPH."},
+{q:"Как называется процесс синтеза АТФ с использованием энергии света?",o:["Фотолиз","Фотосинтез","Фотохимическая реакция","Фотофосфорилирование","Фотолизация"],a:3,e:"Фотофосфорилирование — синтез АТФ за счёт энергии света через создание протонного градиента."},
+{q:"Какую функцию выполняет цитохром b6f в процессе световой фазы?",o:["Синтез АТФ","Поглощение кислорода","Перенос электронов и протонов","Восстановление НАДФ","Перенос света"],a:2,e:"Комплекс цитохрома b6f участвует в переносе электронов и перемещении протонов, формируя протонный градиент."},
+{q:"Какие два типа фотосистем участвуют в световой фазе фотосинтеза?",o:["ФС I и ФС II","ФС II и ФС III","ФС I и Цитохром","ФС II и Цитохром","ФС I и Хлорофилл"],a:0,e:"В световых реакциях высших растений работают две фотосистемы: ФС II и ФС I."},
+{q:"Какую роль играют ионы водорода в световой фазе фотосинтеза?",o:["Окисляют хлорофилл","Восстанавливают НАДФ","Образуют кислород","Переносят электроны","Запускают фотолиз воды"],a:1,e:"Протоны участвуют в восстановлении НАДФ⁺ до NADPH и одновременно создают протонный градиент."},
+{q:"Как циклическое фосфорилирование помогает растению в условиях недостатка воды?",o:["Обеспечивает достаточную энергию для АТФ","Увеличивает производство кислорода","Ускоряет фотолиз воды","Запускает образование протонов","Преобразует хлорофилл в активное состояние"],a:0,e:"Циклический поток электронов вокруг ФС I увеличивает образование АТФ без фотолиза воды и выделения O₂."},
+{q:"Какие особенности работы фотосистемы II важны для её функционирования в световой фазе?",o:["Поглощение света длиной волны 680 нм","Транспорт протонов из стромы","Деградация хлорофилла","Окисление НАДФ","Запуск фотолиза"],a:0,e:"Реакционный центр ФС II связан с P680, который поглощает свет примерно в области 680 нм."},
+{q:"Как образование градиента протонов влияет на синтез АТФ?",o:["Ускоряет распад АТФ","Создаёт энергию для АТФ-синтазы","Приводит к деградации хлорофилла","Поглощает свет","Обеспечивает восстановление НАДФ"],a:1,e:"Поток H⁺ через АТФ-синтазу обеспечивает энергию для присоединения фосфата к АДФ и синтеза АТФ."},
+{q:"Как происходит восстановление НАДФ в световой фазе фотосинтеза?",o:["Поглощением ионов водорода","Переносом энергии от фотосистемы I","Образованием АТФ","Поглощением кислорода","Приёмом протонов и электронов"],a:4,e:"НАДФ⁺ принимает электроны и протон, превращаясь в восстановленный NADPH."},
+{q:"Какова главная функция фотосистемы I в процессе световой фазы?",o:["Запуск фотолиза воды","Перенос электронов на ферредоксин","Поглощение света длиной волны 700 нм","Образование кислорода","Перенос протонов через мембрану"],a:2,e:"Реакционный центр ФС I — P700; фотосистема поглощает свет около 700 нм и передаёт электроны далее."}
+];
+
+let current=0, score=0, answered=false;
+const qEl=document.getElementById("question"), optsEl=document.getElementById("options"),
+feedback=document.getElementById("feedback"), next=document.getElementById("next"),
+bar=document.getElementById("bar"), counter=document.getElementById("counter"),
+percent=document.getElementById("percent"), qnum=document.getElementById("qnum");
+
+function render(){
+ answered=false; const x=questions[current];
+ qnum.textContent="ВОПРОС "+(current+1);
+ counter.textContent=`Вопрос ${current+1} из ${questions.length}`;
+ percent.textContent=Math.round(current/questions.length*100)+"%";
+ bar.style.width=(current/questions.length*100)+"%";
+ qEl.textContent=x.q; optsEl.innerHTML="";
+ feedback.className="feedback"; feedback.innerHTML="";
+ next.className="next";
+ x.o.forEach((t,i)=>{
+   const b=document.createElement("button"); b.className="option";
+   b.innerHTML=`<span class="letter">${String.fromCharCode(65+i)})</span><span>${t}</span>`;
+   b.onclick=()=>choose(i,b); optsEl.appendChild(b);
+ });
+}
+function choose(i,btn){
+ if(answered)return; answered=true;
+ const x=questions[current], buttons=[...optsEl.children];
+ buttons.forEach(b=>b.classList.add("disabled"));
+ buttons[x.a].classList.add("correct");
+ if(i===x.a){
+   score++; feedback.className="feedback correct show";
+   feedback.innerHTML=`✅ <span class="answer">Правильно!</span><br>${x.e}`;
+ }else{
+   btn.classList.add("wrong"); feedback.className="feedback wrong show";
+   feedback.innerHTML=`❌ <span class="answer">Неверно.</span><br>Правильный ответ: <b>${String.fromCharCode(65+x.a)}) ${x.o[x.a]}</b><br>${x.e}`;
+ }
+ next.textContent=current===questions.length-1?"Показать результат →":"Следующий вопрос →";
+ next.className="next show";
+ percent.textContent=Math.round((current+1)/questions.length*100)+"%";
+ bar.style.width=((current+1)/questions.length*100)+"%";
+}
+next.onclick=()=>{
+ if(current<questions.length-1){current++;render()}
+ else showResult();
+};
+function showResult(){
+ document.getElementById("quizCard").style.display="none";
+ document.querySelector(".note").style.display="none";
+ const r=document.getElementById("result"); r.className="card result show";
+ document.getElementById("score").textContent=`${score} / ${questions.length}`;
+ const p=Math.round(score/questions.length*100);
+ document.getElementById("resultText").textContent=
+   p>=90?"Отличный результат! Вы хорошо ориентируетесь в световой фазе фотосинтеза.":
+   p>=70?"Хороший результат! Повторите отдельные этапы световых реакций.":
+   "Стоит ещё раз разобрать фотосистемы, перенос электронов и протонный градиент.";
+}
+function restart(){
+ current=0;score=0;
+ document.getElementById("quizCard").style.display="block";
+ document.querySelector(".note").style.display="block";
+ document.getElementById("result").className="card result";
+ render();
+}
+render();
+</script>
+</body>
+</html>
